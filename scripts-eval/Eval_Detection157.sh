@@ -5,7 +5,7 @@ cd ../
 # CUDA_LAUNCH_BLOCKING=1 python3 eval_textBPN.py --net resnet18 --scale 4 --exp_name Totaltext --checkepoch 570 --test_size 640 1024 --dis_threshold 0.25 --cls_threshold 0.85 --gpu 0;
 
 ##################### eval for Total-Text with ResNet50 1s ###################################
-CUDA_LAUNCH_BLOCKING=1 python3 eval_textBPN.py --net resnet50 --scale 1 --exp_name Totaltext --checkepoch 285 --test_size 640 1024 --dis_threshold 0.325 --cls_threshold 0.85 --gpu 0 --viz;
+CUDA_LAUNCH_BLOCKING=1 python3 eval_textBPN.py --net resnet50 --scale 1 --exp_name Detection157 --checkepoch 285 --test_size 640 1024 --dis_threshold 0.325 --cls_threshold 0.85 --gpu 0 --viz;
 
 
 ##################### eval for Total-Text with ResNet50-DCN 1s ###################################

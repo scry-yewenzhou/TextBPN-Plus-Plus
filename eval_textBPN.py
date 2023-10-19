@@ -9,7 +9,7 @@ import subprocess
 import torch.backends.cudnn as cudnn
 import torch.utils.data as data
 from dataset import TotalText, Ctw1500Text, Icdar15Text, Mlt2017Text, TD500Text, \
-    ArtText, ArtTextJson, Mlt2019Text, Ctw1500Text_New, TotalText_New
+    ArtText, ArtTextJson, Mlt2019Text, Ctw1500Text_New, TotalText_New, Detection157Text
 from network.textnet import TextNet
 from cfglib.config import config as cfg, update_config, print_config
 from cfglib.option import BaseOptions
@@ -109,6 +109,7 @@ def inference(model, test_loader, output_dir):
         contours = output_dict["py_preds"][-1].int().cpu().numpy()
         img_show, contours = rescale_result(img_show, contours, H, W)
 
+        # comment L113-L118 if you want to plot
         # path = os.path.join(cfg.vis_dir, '{}_test'.format(cfg.exp_name), meta['image_id'][idx].split(".")[0] + ".jpg")
         # im_show = img_show.copy()
         # im_show = np.ascontiguousarray(im_show[:, :, ::-1])
@@ -121,6 +122,10 @@ def inference(model, test_loader, output_dir):
 
         # write to file
         if cfg.exp_name == "Icdar2015":
+            fname = "res_" + meta['image_id'][idx].replace('jpg', 'txt')
+            contours = data_transfer_ICDAR(contours)
+            write_to_file(contours, os.path.join(output_dir, fname))
+        elif cfg.exp_name == "Detection157":
             fname = "res_" + meta['image_id'][idx].replace('jpg', 'txt')
             contours = data_transfer_ICDAR(contours)
             write_to_file(contours, os.path.join(output_dir, fname))
@@ -184,6 +189,11 @@ def main(vis_dir_path):
             is_training=False,
             transform=BaseTransform(size=cfg.test_size, mean=cfg.means, std=cfg.stds)
         )
+    elif cfg.exp_name == "Detection157":
+        testset = Detection157Text(
+            data_root='data/for_fs_recog_test_dataset_origin_images_and_tsvs_Sep_19_2023',
+            transform=BaseTransform(size=cfg.test_size, mean=cfg.means, std=cfg.stds)
+        )
     elif cfg.exp_name == "MLT2017":
         testset = Mlt2017Text(
             data_root='data/MLT2017',
@@ -232,6 +242,10 @@ def main(vis_dir_path):
 
     elif cfg.exp_name == "Icdar2015":
         deal_eval_icdar15(debug=True)
+    
+    elif cfg.exp_name == "Detection157":
+        deal_eval_icdar15(debug=True)
+        
     elif cfg.exp_name == "TD500":
         deal_eval_TD500(debug=True)
     else:
