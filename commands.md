@@ -13,7 +13,7 @@ docker run --gpus all --pid=host --shm-size=1g -it -v <host>:/root/ <image> bash
 Install packages
 ```
 apt-get update
-apt-get install sudo wget curl zip git ffmpeg libsm6 libxext6 -y
+apt-get install sudo wget curl zip git ffmpeg libsm6 libxext6 software-properties-common -y
 ```
 
 Install AWS CLI
@@ -42,6 +42,11 @@ conda activate textbpn++
 Install PyTorch 1.10.1
 ```
 pip install torch==1.10.1+cu111 torchvision==0.11.2+cu111 torchaudio==0.10.1 -f https://download.pytorch.org/whl/cu111/torch_stable.html
+```
+
+Install other python packages
+```
+pip install gdown opencv-python==4.4.0.46 shapely scipy==1.10.1 easydict matplotlib==3.6 lxml tqdm tensorboardX numpy==1.19.5
 ```
 
 Generate SSH Key
@@ -133,8 +138,51 @@ bash Eval_TD500.sh
 
 ## Training
 
-### Train TD500
+### Train on TD500
+
+Start training
+No pretraining
+log_freq and val_freq don't work
+Should try to match https://github.com/GXYM/TextBPN-Plus-Plus#pre-training-models
+
 ```
-cd TextBPN-Plus-Plus/scripts-train/
-bash train_TD500_res50_1s.sh
+cd ~/TextBPN-Plus-Plus
+CUDA_LAUNCH_BLOCKING=1 \ # start with debug env
+python train_textBPN.py \
+--exp_name TD500 \
+--net resnet50 \
+--scale 1 \
+--max_epoch 1200 \
+--batch_size 6 \
+--gpu 0 \
+--input_size 640 \
+--optim Adam \
+--lr 0.0005 \
+--num_workers 0 \
+--save_freq 1 \
+--display_freq 10 \
+--save_dir ./model/TotalText-no-pretrain-reproduce \
+--load_memory True
+```
+
+Resume training
+```
+cd ~/TextBPN-Plus-Plus
+CUDA_LAUNCH_BLOCKING=1 python train_textBPN.py \
+--exp_name TD500 \
+--resume ./model/TD500-no-pretrain-reproduce/TD500/TextBPN_resnet50_5.pth \
+--start_epoch 6 \
+--net resnet50 \
+--scale 1 \
+--max_epoch 1200 \
+--batch_size 6 \
+--gpu 0 \
+--input_size 640 \
+--optim Adam \
+--lr 0.0005 \
+--num_workers 0 \
+--save_freq 5 \
+--display_freq 10 \
+--save_dir ./model/TotalText-no-pretrain-reproduce \
+--load_memory True
 ```
