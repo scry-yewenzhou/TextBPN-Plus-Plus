@@ -20,27 +20,28 @@ from tqdm import tqdm
 MODELS = {
     "TD500-reproduce-102023": {
         "prefix": "OCRBenchmark/TextBPNPlusPlus-TD500-Reproduce-ResNet50-102323/",
-        "s3_path": "s3://collatio-nnocr/OCRBenchmark/TextBPNPlusPlus-TD500-Reproduce-ResNet50-102323", # no / in the end
+        "s3_path": "s3://collatio-nnocr/OCRBenchmark/TextBPNPlusPlus-TD500-Reproduce-ResNet50-102323",  # no / in the end
         "exp_name": "TD500",
         "save_model_dir": "/root/TextBPN-Plus-Plus/model/TD500-no-pretrain-reproduce",
         "backbone": "resnet50",
-        "result_csv": "/root/TextBPN-Plus-Plus/model/TD500-no-pretrain-reproduce/TD500-eval.csv", # csv of results
-        "thresh": 65, # start evaluating >= thresh epoch
-        "eval_path": "TextBPN-Plus-Plus/output/Analysis/TD500_eval.txt", # path to evaluation txt
+        "result_csv": "/root/TextBPN-Plus-Plus/model/TD500-no-pretrain-reproduce/TD500-eval.csv",  # csv of results
+        "thresh": 65,  # start evaluating >= thresh epoch
+        "eval_path": "TextBPN-Plus-Plus/output/Analysis/TD500_eval.txt",  # path to evaluation txt
     }
 }
 
+
 def find_all_iter_epochs(prefix: str) -> list:
     """Find all iteration epochs, return as a set
-    
-    Returns: 
+
+    Returns:
         set: looks like set("TextBPN_resnet50_70", "TextBPN_resnet50_75", ...)
     """
     res = set()
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket('collatio-nnocr')
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket("collatio-nnocr")
     # List objects within a given prefix
-    for obj in bucket.objects.filter(Delimiter='/', Prefix=prefix):
+    for obj in bucket.objects.filter(Delimiter="/", Prefix=prefix):
         res.add(Path(obj.key).stem)
     res_list = list(res)
     res_list.sort()
@@ -60,7 +61,7 @@ def filter_epochs(epochs: list, threshold: int) -> list:
 
 def download_iter_epoch(s3_path: str, epoch: str, out: str):
     """Download epoch model from s3 to out
-    
+
     Args:
         s3_path (str): "s3://collatio-nnocr/OCRBenchmark/TextBPNPlusPlus-TD500-Reproduce-ResNet50-102323"
         epoch (str): "TextBPN_resnet50_60"
@@ -76,9 +77,9 @@ def delete_models(model_dir: str):
 
 
 def set_logging():
-    logger = logging.getLogger('Easter Arabic Logger')
+    logger = logging.getLogger("Easter Arabic Logger")
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(message)s")
 
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(formatter)
@@ -89,10 +90,10 @@ def set_logging():
 def get_epoch_num(epoch: str) -> int:
     """
     Get epoch number from epoch
-    
+
     Args:
         epoch (str): e.g. TextBPN_resnet50_60
-        
+
     Returns:
         int: 60
     """
@@ -101,7 +102,7 @@ def get_epoch_num(epoch: str) -> int:
 
 def evaluate(epoch: int, backbone: str, model_save_dir: str):
     """Evaluate epoch
-    
+
     Args:
         epoch (int): e.g. 20
         backbone (str): e.g. resnet50
@@ -127,7 +128,7 @@ def evaluate(epoch: int, backbone: str, model_save_dir: str):
 if __name__ == "__main__":
     # set variables
     model = MODELS["TD500-reproduce-102023"]
-    
+
     model_prefix = model["prefix"]
     exp_name = model["exp_name"]
     model_s3_path = model["s3_path"]
@@ -135,14 +136,14 @@ if __name__ == "__main__":
     threshold = model["thresh"]
     result_csv = model["result_csv"]
     backbone = model["backbone"]
-    
+
     logger = set_logging()
     logger.info("Locating all model checkpoints...")
     start = time.time()
     # find all possible epochs
     all_epochs = find_all_iter_epochs(model_prefix)
     filtered_epochs = filter_epochs(all_epochs, threshold)
-    
+
     for epoch in tqdm(filtered_epochs):
         # download the model
         model_save_to_dir = os.path.join(save_model_dir, exp_name)
@@ -158,7 +159,7 @@ if __name__ == "__main__":
         # delete the model
         logger.info(f"Deleting model {epoch}...")
         delete_models(model_save_to_dir)
-        
+
         # finish and log
         logger.info(f"Finish {epoch}!!!")
 
