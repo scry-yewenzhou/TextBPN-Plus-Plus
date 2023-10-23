@@ -126,7 +126,7 @@ def train(model, train_loader, criterion, scheduler, optimizer, epoch):
             if epoch % cfg.save_freq == 0:
                 save_model(model, epoch, scheduler.get_lr(), optimizer)
     else:
-        if epoch % cfg.save_freq == 0 and epoch > 50:
+        if epoch % cfg.save_freq == 0:
             save_model(model, epoch, scheduler.get_lr(), optimizer)
 
     print('Training Loss: {}'.format(losses.avg))
@@ -232,6 +232,7 @@ def main():
 
     train_loader = data.DataLoader(trainset, batch_size=cfg.batch_size,
                                    shuffle=True, num_workers=cfg.num_workers,
+                                   generator=torch.Generator(device='cuda'),
                                    pin_memory=True)  # generator=torch.Generator(device=cfg.device)
 
     # Model
